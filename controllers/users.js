@@ -8,9 +8,7 @@ const {
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      return res.status(defaultError).send({ message: err.message });
-    });
+    .catch((err) => res.status(defaultError).send({ message: err.message }));
 };
 
 const getUser = (req, res) => {
@@ -22,7 +20,9 @@ const getUser = (req, res) => {
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(documentNotFoundError).send({ message: err.message });
-      } else if (err.name === "CastError") {
+      }
+
+      if (err.name === "CastError") {
         return res.status(castError).send({ message: err.message });
       }
 
