@@ -5,7 +5,7 @@ const {
   defaultError,
 } = require("../utils/errors");
 
-getUsers = (req, res) => {
+const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => {
@@ -13,7 +13,7 @@ getUsers = (req, res) => {
     });
 };
 
-getUser = (req, res) => {
+const getUser = (req, res) => {
   const { userId } = req.params;
 
   User.findById(userId)
@@ -30,7 +30,7 @@ getUser = (req, res) => {
     });
 };
 
-createUser = (req, res) => {
+const createUser = (req, res) => {
   const { name, avatar } = req.body;
 
   User.create({ name, avatar })
