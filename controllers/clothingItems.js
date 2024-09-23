@@ -2,6 +2,7 @@ const Item = require("../models/clothingItem");
 const {
   castError,
   documentNotFoundError,
+  forbiddenError,
   defaultError,
 } = require("../utils/errors");
 
@@ -35,7 +36,15 @@ const createItem = (req, res) => {
 const deleteItem = (req, res) => {
   Item.findByIdAndDelete(req.params.itemId)
     .orFail()
-    .then((item) => res.status(200).send({ data: item }))
+    .then((item) => {
+      if (!item.owner.equals(req.user._id)) {
+        return res
+          .status(forbiddenError)
+          .send({ message: "Not permitted access" });
+      }
+
+      return res.status(200).send({ message: "Item has been deleted" });
+    })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
         return res

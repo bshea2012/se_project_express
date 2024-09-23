@@ -3,9 +3,15 @@ const router = require("express").Router();
 const userRouter = require("./users");
 const itemRouter = require("./clothingItems");
 const { documentNotFoundError } = require("../utils/errors");
+const auth = require("../middleware/auth");
+const { createUser, login } = require("../controllers/users");
+const { createItem } = require("../controllers/clothingItems");
 
-router.use("/users", userRouter);
+router.use("/users", auth, userRouter);
 router.use("/items", itemRouter);
+// router.post("/items", createItem);
+router.post("/signup", createUser);
+router.post("/signin", login);
 
 router.use((req, res) => {
   res.status(documentNotFoundError).send({
