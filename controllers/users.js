@@ -65,7 +65,7 @@ const login = (req, res) => {
         return res.status(authorizationError).send({ message: "Invalid data" });
       }
 
-      res.status(defaultError).send({ message: "Not authorized" });
+      return res.status(defaultError).send({ message: "Not authorized" });
     });
 };
 
