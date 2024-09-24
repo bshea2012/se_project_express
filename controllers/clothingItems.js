@@ -9,7 +9,7 @@ const {
 const getItems = (req, res) => {
   Item.find({})
     .then((items) => res.status(200).send(items))
-    .catch((err) =>
+    .catch(() =>
       res
         .status(defaultError)
         .send({ message: "An error has occurred on the server" })
@@ -34,7 +34,7 @@ const createItem = (req, res) => {
 };
 
 const deleteItem = (req, res) => {
-  Item.findByIdAndDelete(req.params.itemId)
+  Item.findById(req.params.itemId)
     .orFail()
     .then((item) => {
       if (!item.owner.equals(req.user._id)) {
@@ -43,7 +43,9 @@ const deleteItem = (req, res) => {
           .send({ message: "Not permitted access" });
       }
 
-      return res.status(200).send({ message: "Item has been deleted" });
+      return item
+        .deleteOne()
+        .then(res.status(200).send({ message: "Item has been deleted" }));
     })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
