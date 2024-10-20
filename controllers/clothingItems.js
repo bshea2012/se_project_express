@@ -5,15 +5,18 @@ const {
   forbiddenError,
   defaultError,
 } = require("../utils/errors");
+const BadRequestError = require("../errors/bad-request");
+const ConflictError = require("../errors/conflict");
+const UnauthorizedError = require("../errors/unauthorized");
+const NotFoundError = require("../errors/not-found");
+const ForbiddenError = require("../errors/forbidden");
 
 const getItems = (req, res) => {
   Item.find({})
     .then((items) => res.status(200).send(items))
-    .catch(() =>
-      res
-        .status(defaultError)
-        .send({ message: "An error has occurred on the server" })
-    );
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const createItem = (req, res) => {
@@ -24,12 +27,10 @@ const createItem = (req, res) => {
     .then((item) => res.status(201).send({ data: item }))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(castError).send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
 
-      return res
-        .status(defaultError)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
@@ -38,9 +39,7 @@ const deleteItem = (req, res) => {
     .orFail()
     .then((item) => {
       if (!item.owner.equals(req.user._id)) {
-        return res
-          .status(forbiddenError)
-          .send({ message: "Not permitted access" });
+        return new ForbiddenError("Not permitted access");
       }
 
       return item
@@ -49,18 +48,14 @@ const deleteItem = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(documentNotFoundError)
-          .send({ message: "Invalid data" });
+        return new NotFoundError("Invalid data");
       }
 
       if (err.name === "CastError") {
-        return res.status(castError).send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
 
-      return res
-        .status(defaultError)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
@@ -76,18 +71,14 @@ const itemLike = (req, res) => {
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(documentNotFoundError)
-          .send({ message: "Invalid data" });
+        return new NotFoundError("Invalid data");
       }
 
       if (err.name === "CastError") {
-        return res.status(castError).send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
 
-      return res
-        .status(defaultError)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
@@ -103,18 +94,14 @@ const itemUnlike = (req, res) => {
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(documentNotFoundError)
-          .send({ message: "Invalid data" });
+        return new NotFoundError("Invalid data");
       }
 
       if (err.name === "CastError") {
-        return res.status(castError).send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
 
-      return res
-        .status(defaultError)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 

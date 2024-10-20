@@ -9,6 +9,10 @@ const {
   defaultError,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
+const BadRequestError = require("../errors/bad-request");
+const ConflictError = require("../errors/conflict");
+const UnauthorizedError = require("../errors/unauthorized");
+const NotFoundError = require("../errors/not-found");
 
 const createUser = (req, res) => {
   const { email, password, name, avatar } = req.body;
@@ -16,7 +20,7 @@ const createUser = (req, res) => {
   User.findOne({ email })
     .then((existingUser) => {
       if (existingUser) {
-        throw new Error("Email already in use");
+        throw new ConflictError("Email already in use");
       }
 
       return bcrypt.hash(password, 10);
@@ -30,18 +34,10 @@ const createUser = (req, res) => {
     )
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(castError).send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
 
-      if (err.message === "Email already in use") {
-        return res
-          .status(existingError)
-          .send({ message: "An account already exists with this email" });
-      }
-
-      return res
-        .status(defaultError)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
@@ -49,7 +45,7 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(castError).send({ message: `Invalid data` });
+    return new BadRequestError("Invalid data");
   }
 
   return User.findUserByCredentials(email, password)
@@ -62,10 +58,10 @@ const login = (req, res) => {
     })
     .catch((err) => {
       if (err.message === "Incorrect email or password") {
-        return res.status(authorizationError).send({ message: "Invalid data" });
+        return next(new UnauthorizedError("Invalid data"));
       }
 
-      return res.status(defaultError).send({ message: "Not authorized" });
+      return next(err);
     });
 };
 
@@ -77,14 +73,10 @@ const getCurrentUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(documentNotFoundError)
-          .send({ message: "Invalid data" });
+        return new NotFoundError("Invalid data");
       }
 
-      return res
-        .status(defaultError)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 
@@ -103,22 +95,14 @@ const updateProfile = (req, res) => {
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(documentNotFoundError)
-          .send({ message: "Invalid data" });
+        return next(new NotFoundError("Invalid data"));
       }
 
       if (err.name === "ValidationError") {
-        return res.status(castError).send({ message: "Invalid data" });
+        return next(new BadRequestError("Invalid data"));
       }
 
-      if (err.name === "CastError") {
-        return res.status(castError).send({ message: "Invalid data" });
-      }
-
-      return res
-        .status(defaultError)
-        .send({ message: "An error has occurred on the server" });
+      return next(err);
     });
 };
 

@@ -5,11 +5,15 @@ const itemRouter = require("./clothingItems");
 const { documentNotFoundError } = require("../utils/errors");
 const auth = require("../middleware/auth");
 const { createUser, login } = require("../controllers/users");
+const {
+  validateUserBody,
+  validateAuthLoginBody,
+} = require("../middleware/validation");
 
 router.use("/users", auth, userRouter);
 router.use("/items", itemRouter);
-router.post("/signup", createUser);
-router.post("/signin", login);
+router.post("/signup", validateUserBody, createUser);
+router.post("/signin", validateAuthLoginBody, login);
 
 router.use((req, res) => {
   res.status(documentNotFoundError).send({
