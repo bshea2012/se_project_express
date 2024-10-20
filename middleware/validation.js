@@ -21,7 +21,7 @@ const validateCardBody = celebrate({
       "string.uri": 'the "imageUrl" field must be a valid url',
     }),
 
-    weather: Joi.string().required(),
+    weather: Joi.string().required().valid("hot", "warm", "cold"),
   }),
 });
 
