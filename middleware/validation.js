@@ -73,15 +73,13 @@ const validateAuthLoginBody = celebrate({
 });
 
 const validateItemId = celebrate({
-  params: Joi.object()
-    .keys({
-      itemId: Joi.string().hex().length(24).messages({
-        "string.empty": 'The "id" field must be filled in',
-        "string.hex": 'The "id" field must be a hexadecimal value',
-        "string.length": 'The "id" field must be exactly 24 characters long',
-      }),
-    })
-    .unknown(true),
+  params: Joi.object().keys({
+    itemId: Joi.string().hex().length(24).messages({
+      "string.empty": 'The "id" field must be filled in',
+      "string.hex": 'The "id" field must be a hexadecimal value',
+      "string.length": 'The "id" field must be exactly 24 characters long',
+    }),
+  }),
 });
 
 module.exports = {

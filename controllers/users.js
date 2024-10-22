@@ -1,20 +1,13 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const {
-  castError,
-  documentNotFoundError,
-  authorizationError,
-  existingError,
-  defaultError,
-} = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 const BadRequestError = require("../errors/bad-request");
 const ConflictError = require("../errors/conflict");
 const UnauthorizedError = require("../errors/unauthorized");
 const NotFoundError = require("../errors/not-found");
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { email, password, name, avatar } = req.body;
 
   User.findOne({ email })
@@ -41,12 +34,8 @@ const createUser = (req, res) => {
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    return new BadRequestError("Invalid data");
-  }
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -65,7 +54,7 @@ const login = (req, res) => {
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
 
   User.findById(_id)
@@ -73,14 +62,14 @@ const getCurrentUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return new NotFoundError("Invalid data");
+        return next(new NotFoundError("Invalid data"));
       }
 
       return next(err);
     });
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const { name, avatar } = req.body;
 
   User.findByIdAndUpdate(

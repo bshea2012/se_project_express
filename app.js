@@ -2,10 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const helmet = require("helmet");
 const { errors } = require("celebrate");
 const indexRouter = require("./routes/index");
 const errorHandler = require("./middleware/error-handler");
 const { requestLogger, errorLogger } = require("./middleware/logger");
+const { limiter } = require("./middleware/rate-limiting");
 
 const { PORT = 3001 } = process.env;
 
@@ -19,6 +21,8 @@ mongoose
   .catch(console.error);
 
 app.use(requestLogger);
+app.use(limiter);
+app.use(helmet());
 app.use(express.json());
 app.use(cors());
 app.get("/crash-test", () => {

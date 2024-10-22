@@ -1,17 +1,9 @@
 const Item = require("../models/clothingItem");
-const {
-  castError,
-  documentNotFoundError,
-  forbiddenError,
-  defaultError,
-} = require("../utils/errors");
 const BadRequestError = require("../errors/bad-request");
-const ConflictError = require("../errors/conflict");
-const UnauthorizedError = require("../errors/unauthorized");
 const NotFoundError = require("../errors/not-found");
 const ForbiddenError = require("../errors/forbidden");
 
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   Item.find({})
     .then((items) => res.status(200).send(items))
     .catch((err) => {
@@ -19,7 +11,7 @@ const getItems = (req, res) => {
     });
 };
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
@@ -34,12 +26,12 @@ const createItem = (req, res) => {
     });
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   Item.findById(req.params.itemId)
     .orFail()
     .then((item) => {
       if (!item.owner.equals(req.user._id)) {
-        return new ForbiddenError("Not permitted access");
+        return next(new ForbiddenError("Not permitted access"));
       }
 
       return item
@@ -48,7 +40,7 @@ const deleteItem = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return new NotFoundError("Invalid data");
+        return next(new NotFoundError("Invalid data"));
       }
 
       if (err.name === "CastError") {
@@ -59,7 +51,7 @@ const deleteItem = (req, res) => {
     });
 };
 
-const itemLike = (req, res) => {
+const itemLike = (req, res, next) => {
   const { itemId } = req.params;
 
   Item.findByIdAndUpdate(
@@ -71,7 +63,7 @@ const itemLike = (req, res) => {
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return new NotFoundError("Invalid data");
+        return next(new NotFoundError("Invalid data"));
       }
 
       if (err.name === "CastError") {
@@ -82,7 +74,7 @@ const itemLike = (req, res) => {
     });
 };
 
-const itemUnlike = (req, res) => {
+const itemUnlike = (req, res, next) => {
   const { itemId } = req.params;
 
   Item.findByIdAndUpdate(
@@ -94,7 +86,7 @@ const itemUnlike = (req, res) => {
     .then((item) => res.status(200).send({ data: item }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return new NotFoundError("Invalid data");
+        return next(new NotFoundError("Invalid data"));
       }
 
       if (err.name === "CastError") {

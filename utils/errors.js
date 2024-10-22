@@ -1,15 +1,15 @@
-const castError = 400;
-const documentNotFoundError = 404;
-const authorizationError = 401;
-const forbiddenError = 403;
-const existingError = 409;
-const defaultError = 500;
+const CastError = 400;
+const DocumentNotFoundError = 404;
+const AuthorizationError = 401;
+const ForbiddenError = 403;
+const ExistingError = 409;
+const DefaultError = 500;
 
 module.exports = {
-  castError,
-  documentNotFoundError,
-  authorizationError,
-  forbiddenError,
-  existingError,
-  defaultError,
+  CastError,
+  DocumentNotFoundError,
+  AuthorizationError,
+  ForbiddenError,
+  ExistingError,
+  DefaultError,
 };
